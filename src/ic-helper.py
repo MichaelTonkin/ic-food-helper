@@ -44,19 +44,9 @@ def populateFromCsv(file, patient):
         patient.weight = temp[0][4]
         #loop through each character
 
-        for x in temp[0][4]:
-            counter + 1
-            print (x)
-        #if we find a number save it to s
-            if x == 1 or x == 2 or x == 3 or x == 4 or x == 5 or x == 6 or x == 7 or x == 8 or x == 9:
-                s = counter
-        #if we find a space save it to e
-            if x == " ":
-                e = counter
-        #pass through .split
         patient.weight = temp[0][4][s:e]
         #convert to float
-        print(patient.weight)
+        print(temp)
 
 newPatient = patientData()
 patients.append(newPatient)
