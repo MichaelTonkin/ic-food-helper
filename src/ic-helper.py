@@ -82,8 +82,7 @@ def check_feeding_stopped(iss):
     for x in range(0, len(iss) - 1):
         if iss[x] == "FEEDING STOPPED":
             return True
-        else:
-            return False
+    return False
 
 #call function to create and populate new patients
 add_patient("..\\res\\PATIENT DATA - PATIENT A1.csv", "A1")
@@ -99,7 +98,7 @@ add_patient("..\\res\\PATIENT DATA - PATIENT B7.csv", "B7")
 
 #function: crit_grv
 #description: calculates the value for the critical grv level
-#parameters: patientData patient - the patient for whom we are calculating for
+#parameters: patientData patient - the patient for whom we are calculating the critical grv for
 def crit_grv(patient):
    grv = patient.weight * 5
    return grv
