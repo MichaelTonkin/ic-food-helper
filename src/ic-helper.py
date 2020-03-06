@@ -32,6 +32,7 @@ class queue:
     def front(self):
         return self.q[0]
 
+
 #function: string_to_float
 #description: when given any string, will search for a float in that string.
 #parameters: inputString - the string which is to be converted to a float
@@ -78,7 +79,7 @@ def add_patient(file, pid):
 #description: checks a patient's issues list to see if they have had their feeding stopped
 #parameters: List iss - the issues list from the patient we want to check
 def check_feeding_stopped(iss):
-    for x in iss:
+    for x in range(0, len(iss) - 1):
         if iss[x] == "FEEDING STOPPED":
             return True
         else:
@@ -103,17 +104,22 @@ def crit_grv(patient):
    grv = patient.weight * 5
    return grv
 
+def update_issues_status(patient, value):
+    patient.issues[len(patient.issues) - 1] = value
+    patient.grvTime.dequeue()
+
 def process_input(patient):
     #set critical grv
     critGrv = crit_grv(patient)
 
-    while patient.issues[patient.issuesCounter] == None:
+    while patient.grvTime.front() != None:
         currentData = patient.grvTime.front()
         grv = currentData[2]
 
         #increment the issues counter if the day changes and end function
-        if (currentData[0] != ""):
+        if (currentData[0] != "" or currentData[1] == ""):
             print("Patient " + str(patient.pid) + " - Issues = " + str(patient.issues))
+            patient.issues.append(None)
             patient.issuesCounter += 1
             patient.grvTime.dequeue()
             break
@@ -125,28 +131,21 @@ def process_input(patient):
                 #loop to check if any of our issues today contain "feeding stopped"
                 #so that we can more correctly update with "see dietician"
                 if check_feeding_stopped(patient.issues):
-                    patient.issues[patient.issuesCounter] = "SEE DIETICIAN"
-                    patient.issues.append(None)
-                    patient.issuesCounter += 1
-                    patient.grvTime.dequeue()
+                    update_issues_status(patient, "SEE DIETICIAN")
                 else:
-                    patient.issues[patient.issuesCounter] = "FEEDING STOPPED"
-                    patient.issues.append(None)
-                    patient.issuesCounter += 1
-                    patient.grvTime.dequeue()
+                    update_issues_status(patient, "FEEDING STOPPED")
             else: #else update issue with none and goto next row
-                patient.issues[patient.issuesCounter] = "NONE"
-                patient.grvTime.dequeue()
+                update_issues_status(patient, "NONE")
 
         else: #goto next row
             patient.grvTime.dequeue()
 
+
 for x in range(0, 5):
     print("DAY " + str(x+1))
-    process_input(patients[5])
-    print(patients[5].issues)
-
-'''process_input(patients[1])
+    #process_input(patients[5])
+    process_input(patients[0])
+    process_input(patients[1])
     process_input(patients[2])
     process_input(patients[3])
     process_input(patients[4])
@@ -154,4 +153,4 @@ for x in range(0, 5):
     process_input(patients[6])
     process_input(patients[7])
     process_input(patients[8])
-    process_input(patients[9])'''
+    process_input(patients[9])
