@@ -6,6 +6,7 @@ class patientData:
     def __init__(self):
         self.grvTime = queue() #a queue combining time and grv in each entry
         self.issues = [None] #array accounts for issues at the end of each day
+        self.hourlyIssues = [None] #array takes any issues given during the day rather than at the end
         self.issuesCounter = 0 #used to take account of what day we are on
         #constant variables
         self.pid = None #the patient's id that we will refer to them by
@@ -22,7 +23,6 @@ class queue:
     #description: insert a new item to the back of the queue
     #parameters: data - the item to be enqueued (inserted)
     def enqueue(self, data):
-        print(data)
         self.q.append(data)
     #function: dequeue
     #description: remove the item at the front of the queue
@@ -112,7 +112,8 @@ def crit_grv(patient):
    return grv
 
 def update_issues_status(patient, value):
-    patient.issues[len(patient.issues) - 1] = value
+    patient.hourlyIssues.append(None)
+    patient.hourlyIssues[len(patient.hourlyIssues) - 1] = value
     patient.grvTime.dequeue()
 
 def process_input(patient):
@@ -122,13 +123,14 @@ def process_input(patient):
     while patient.grvTime.front() != None:
         currentData = patient.grvTime.front()
         grv = currentData[2]
-
+        print(patient.hourlyIssues)
         #increment the issues counter if the day changes and end function
         if (currentData[0] != "" or currentData[1] == ""):
-            print("Patient " + str(patient.pid) + " - Issues = " + str(patient.issues))
+            patient.issues[len(patient.issues) - 1] = patient.hourlyIssues[len(patient.hourlyIssues) - 1]
+            #print("Patient " + str(patient.pid) + " - Issues = " + str(patient.issues))
             patient.issues.append("NONE")
-            patient.issuesCounter += 1
             patient.grvTime.dequeue()
+            patient.hourlyIssues = [None]
             break
 
         #check if we have a grv value
@@ -137,7 +139,8 @@ def process_input(patient):
             if(float(grv) > critGrv or (patient.weight > 40 and float(grv) > 250)): #if grv is greater than the critical grv level
                 #loop to check if any of our issues today contain "feeding stopped"
                 #so that we can more correctly update with "see dietician"
-                if check_feeding_stopped(patient.issues):
+                if check_feeding_stopped(patient.hourlyIssues):
+                    patient.hourlyIssues = [None]
                     update_issues_status(patient, "SEE DIETICIAN")
                 else:
                     update_issues_status(patient, "FEEDING STOPPED")
@@ -150,13 +153,13 @@ def process_input(patient):
 
 for x in range(1, 6):
     print("DAY " + str(x))
-    process_input(patients[0])
-    process_input(patients[1])
-    process_input(patients[2])
+    #process_input(patients[0])
+    #process_input(patients[1])
+    #process_input(patients[2])
     process_input(patients[3])
-    process_input(patients[4])
-    process_input(patients[5])
-    process_input(patients[6])
-    process_input(patients[7])
-    process_input(patients[8])
-    process_input(patients[9])
+    #process_input(patients[4])
+    #process_input(patients[5])
+    #process_input(patients[6])
+    #process_input(patients[7])
+    #process_input(patients[8])
+    #process_input(patients[9])
