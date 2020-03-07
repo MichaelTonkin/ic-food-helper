@@ -83,9 +83,13 @@ def add_patient(file, pid):
 #description: checks a patient's issues list to see if they have had their feeding stopped
 #parameters: List iss - the issues list from the patient we want to check
 def check_feeding_stopped(iss):
+    feeding_stopped_once = False
     for x in range(0, len(iss) - 1):
-        if iss[x] == "FEEDING STOPPED":
+        if iss[x] == "FEEDING STOPPED" and feeding_stopped_once is True:
             return True
+        if iss[x] == "FEEDING STOPPED":
+            feeding_stopped_once = True
+
     return False
 
 #call function to create and populate new patients
