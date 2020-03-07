@@ -22,6 +22,7 @@ class queue:
     #description: insert a new item to the back of the queue
     #parameters: data - the item to be enqueued (inserted)
     def enqueue(self, data):
+        print(data)
         self.q.append(data)
     #function: dequeue
     #description: remove the item at the front of the queue
@@ -64,6 +65,9 @@ def populateFromCsv(file, patient, pid):
             patient.weight = string_to_float(temp[0][4])
             #set the patient's id
             patient.pid = pid
+
+        #give each queue a buffer on the final day, so that all days consist of 24 hours, instead of day 5 consisting of 23.
+        patient.grvTime.enqueue(['', '', ''])
 
 
 #function: add_patient
@@ -118,7 +122,7 @@ def process_input(patient):
         #increment the issues counter if the day changes and end function
         if (currentData[0] != "" or currentData[1] == ""):
             print("Patient " + str(patient.pid) + " - Issues = " + str(patient.issues))
-            patient.issues.append(None)
+            patient.issues.append("NONE")
             patient.issuesCounter += 1
             patient.grvTime.dequeue()
             break
@@ -140,9 +144,8 @@ def process_input(patient):
             patient.grvTime.dequeue()
 
 
-for x in range(0, 5):
-    print("DAY " + str(x+1))
-    #process_input(patients[5])
+for x in range(1, 6):
+    print("DAY " + str(x))
     process_input(patients[0])
     process_input(patients[1])
     process_input(patients[2])
