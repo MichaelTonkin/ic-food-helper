@@ -5,8 +5,8 @@ patients = []
 class patientData:
     def __init__(self):
         self.grvTime = queue() #a queue combining time and grv in each entry
-        self.issues = [None] #array accounts for issues at the end of each day
-        self.hourlyIssues = [None] #array takes any issues given during the day rather than at the end
+        self.issues = ["NONE"] #array accounts for issues at the end of each day
+        self.hourlyIssues = ["NONE"] #array takes any issues given during the day rather than at the end
         self.issuesCounter = 0 #used to take account of what day we are on
         #constant variables
         self.pid = None #the patient's id that we will refer to them by
@@ -33,8 +33,37 @@ class queue:
     def front(self):
         return self.q[0]
 
+#Function: partition
+#Description: used in conjunction with quicksort.
+#Takes a pivot and arranges elements so that smaller elements appear before the pivot
+#and greater elemetns appear after the pivot.
+def partition(arr, low, high):
+    i = (low - 1)
+    pivot = arr[high].issuesCounter #we take the last element as our pivot point
 
-#function: string_to_float
+    #sort the array by the pivot
+    for j in range(low, high):
+        if arr[j].issuesCounter <= pivot:
+            i = i + 1
+            arr[i], arr[j] = arr[j], arr[i]
+
+    arr[i + 1], arr[high] = arr[high], arr[i + 1]
+    return (i + 1)
+
+#Function: quickSort
+#Description: used to sort a list by breaking it down into partitions
+#Parameters:
+# List arr - the list to be sorted
+# Int low - the starting index of a given partition
+# Int high -the end index of a given partition
+def quickSort(arr, low, high):
+    if low < high:
+        p = partition(arr, low, high)
+
+        quickSort(arr, low, p - 1)
+        quickSort(arr, p + 1, high)
+
+    #function: string_to_float
 #description: when given any string, will search for a float in that string.
 #parameters: inputString - the string which is to be converted to a float
 def string_to_float(inputString):
@@ -116,21 +145,32 @@ def update_issues_status(patient, value):
     patient.hourlyIssues[len(patient.hourlyIssues) - 1] = value
     patient.grvTime.dequeue()
 
-def process_input(patient):
+def process_input(patient, day):
     #set critical grv
     critGrv = crit_grv(patient)
 
     while patient.grvTime.front() != None:
         currentData = patient.grvTime.front()
         grv = currentData[2]
-        print(patient.hourlyIssues)
         #increment the issues counter if the day changes and end function
         if (currentData[0] != "" or currentData[1] == ""):
             patient.issues[len(patient.issues) - 1] = patient.hourlyIssues[len(patient.hourlyIssues) - 1]
-            #print("Patient " + str(patient.pid) + " - Issues = " + str(patient.issues))
-            patient.issues.append("NONE")
+
+            #If the patient has had any complications then increase their complications counter.
+            #This will be used for generating the list on day 5.
+            if (patient.issues[len(patient.issues) - 1] != "NONE"):
+                patient.issuesCounter = patient.issuesCounter + 1
+
+            #do not print for day 5 as we will do this once we have sorted the list properly
+            if (day != 5):
+                #print final output for the day
+                print("Patient " + str(patient.pid) + " - Issues = " + str(patient.issues))
+                # set up the next issues ready for the next loop
+                patient.issues.append("NONE")
+                patient.hourlyIssues = ["NONE"]
+
+            #dequeue the grvTime we just processed as we no longer need it
             patient.grvTime.dequeue()
-            patient.hourlyIssues = [None]
             break
 
         #check if we have a grv value
@@ -140,7 +180,7 @@ def process_input(patient):
                 #loop to check if any of our issues today contain "feeding stopped"
                 #so that we can more correctly update with "see dietician"
                 if check_feeding_stopped(patient.hourlyIssues):
-                    patient.hourlyIssues = [None]
+                    patient.hourlyIssues = ["NONE"]
                     update_issues_status(patient, "SEE DIETICIAN")
                 else:
                     update_issues_status(patient, "FEEDING STOPPED")
@@ -153,13 +193,19 @@ def process_input(patient):
 
 for x in range(1, 6):
     print("DAY " + str(x))
-    #process_input(patients[0])
-    #process_input(patients[1])
-    #process_input(patients[2])
-    process_input(patients[3])
-    #process_input(patients[4])
-    #process_input(patients[5])
-    #process_input(patients[6])
-    #process_input(patients[7])
-    #process_input(patients[8])
-    #process_input(patients[9])
+    process_input(patients[0], x)
+    process_input(patients[1], x)
+    process_input(patients[2], x)
+    process_input(patients[3], x)
+    process_input(patients[4], x)
+    process_input(patients[5], x)
+    process_input(patients[6], x)
+    process_input(patients[7], x)
+    process_input(patients[8], x)
+    process_input(patients[9], x)
+
+#sort the days and print
+quickSort(patients, 0, len(patients) - 1)
+
+for y in range(0, len(patients) - 1):
+    print("Patient " + str(patients[y].pid) + " - Issues = " + str(patients[y].issues))
