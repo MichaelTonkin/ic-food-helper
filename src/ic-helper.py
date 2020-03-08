@@ -1,10 +1,12 @@
 import csv
 
-patients = []
+patients = [] #list will hold all details for patients
 
-class patientData:
+#Class: patientData
+#Description: stores information for each patient.
+class PatientData:
     def __init__(self):
-        self.grvTime = queue() #a queue combining time and grv in each entry
+        self.grvTime = Queue() #a queue combining time and grv in each entry
         self.issues = ["NONE"] #array accounts for issues at the end of each day
         self.hourlyIssues = ["NONE"] #array takes any issues given during the day rather than at the end
         self.issuesCounter = 0 #used to take account of what day we are on
@@ -15,7 +17,7 @@ class patientData:
 #class: queue
 #description: establishes the data type queue and its functions. A queue is a fifo data structure.
 #To use simeply establish a variable as an instance of this class.
-class queue:
+class Queue:
     def __init__(self):
         self.q = []
         pass
@@ -50,20 +52,20 @@ def partition(arr, low, high):
     arr[i + 1], arr[high] = arr[high], arr[i + 1]
     return (i + 1)
 
-#Function: quickSort
+#Function: quick_sort
 #Description: used to sort a list by breaking it down into partitions
 #Parameters:
 # List arr - the list to be sorted
 # Int low - the starting index of a given partition
 # Int high -the end index of a given partition
-def quickSort(arr, low, high):
+def quick_sort(arr, low, high):
     if low < high:
         p = partition(arr, low, high)
 
-        quickSort(arr, low, p - 1)
-        quickSort(arr, p + 1, high)
+        quick_sort(arr, low, p - 1)
+        quick_sort(arr, p + 1, high)
 
-    #function: string_to_float
+#function: string_to_float
 #description: when given any string, will search for a float in that string.
 #parameters: inputString - the string which is to be converted to a float
 def string_to_float(inputString):
@@ -74,7 +76,13 @@ def string_to_float(inputString):
             pass
     return number
 
-def populateFromCsv(file, patient, pid):
+#Function: populate_from_csv
+#Description: Takes data from a given csv files and places it in the patientData structure
+#Parameters:
+#(String) file - the csv file to work with
+#(List item) patient - the patient to populate
+#(String) pid - the id of the patient (taken from the file name, e.g. B1, B2...)
+def populate_from_csv(file, patient, pid):
     counter = 0
     #CSV reader
     with open(file, newline='') as csvfile:
@@ -104,9 +112,9 @@ def populateFromCsv(file, patient, pid):
 #parameters: string file - the file to extract data from for this patient
 #string pid - the patient's id to be refered to
 def add_patient(file, pid):
-    newPatient = patientData()
+    newPatient = PatientData()
     patients.append(newPatient)
-    populateFromCsv(file, patients[len(patients) - 1], pid)
+    populate_from_csv(file, patients[len(patients) - 1], pid)
 
 #function: check_feeding_stopped
 #description: checks a patient's issues list to see if they have had their feeding stopped
@@ -118,7 +126,6 @@ def check_feeding_stopped(iss):
             return True
         if iss[x] == "FEEDING STOPPED":
             feeding_stopped_once = True
-
     return False
 
 #call function to create and populate new patients
@@ -140,11 +147,21 @@ def crit_grv(patient):
    grv = patient.weight * 5
    return grv
 
+#Function: update_issues_status
+#Description: updates a patient's latest issue with a given value
+#Parameters:
+#(patientData) patient - the patient who will have their issues updated
+#(String) value - what we will update the issues with
 def update_issues_status(patient, value):
     patient.hourlyIssues.append(None)
     patient.hourlyIssues[len(patient.hourlyIssues) - 1] = value
     patient.grvTime.dequeue()
 
+#Function: process_input
+#Description: takes a patient and calculates if they have had an issue with their feeding.
+#Parameters:
+#(patientData) patient - the patient to be calculated.
+#(Int) day - the day we are calculating for.
 def process_input(patient, day):
     #set critical grv
     critGrv = crit_grv(patient)
@@ -190,22 +207,15 @@ def process_input(patient, day):
         else: #goto next row
             patient.grvTime.dequeue()
 
-
+#Here is the driver code for processing each day for each patient.
 for x in range(1, 6):
     print("DAY " + str(x))
-    process_input(patients[0], x)
-    process_input(patients[1], x)
-    process_input(patients[2], x)
-    process_input(patients[3], x)
-    process_input(patients[4], x)
-    process_input(patients[5], x)
-    process_input(patients[6], x)
-    process_input(patients[7], x)
-    process_input(patients[8], x)
-    process_input(patients[9], x)
+    for i in range(0, len(patients)):
+        process_input(patients[i], x)
 
-#sort the days and print
-quickSort(patients, 0, len(patients) - 1)
+#sort each patient in order of the number of issues they've had
+quick_sort(patients, 0, len(patients) - 1)
 
+#print sorted patient details for the final day
 for y in range(0, len(patients) - 1):
     print("Patient " + str(patients[y].pid) + " - Issues = " + str(patients[y].issues))
