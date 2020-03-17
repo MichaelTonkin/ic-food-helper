@@ -166,11 +166,15 @@ def process_input(patient, day):
     #set critical grv
     critGrv = crit_grv(patient)
 
+    #while there is still data to read
     while patient.grvTime.front() != None:
         currentData = patient.grvTime.front()
         grv = currentData[2]
+
         #increment the issues counter if the day changes and end function
         if (currentData[0] != "" or currentData[1] == ""):
+
+            #set our patient's daily issues report to the last issue produced by this algorithm
             patient.issues[len(patient.issues) - 1] = patient.hourlyIssues[len(patient.hourlyIssues) - 1]
 
             #If the patient has had any complications then increase their complications counter.
@@ -194,7 +198,7 @@ def process_input(patient, day):
         if(grv != ""): #if we have a grv value in this row
 
             if(float(grv) > critGrv or (patient.weight > 40 and float(grv) > 250)): #if grv is greater than the critical grv level
-                #loop to check if any of our issues today contain "feeding stopped"
+                #check if any of our issues today contain "feeding stopped"
                 #so that we can more correctly update with "see dietician"
                 if check_feeding_stopped(patient.hourlyIssues):
                     patient.hourlyIssues = ["NONE"]
@@ -212,10 +216,10 @@ for x in range(1, 6):
     print("DAY " + str(x))
     for i in range(0, len(patients)):
         process_input(patients[i], x)
-
 #sort each patient in order of the number of issues they've had
 quick_sort(patients, 0, len(patients) - 1)
 
 #print sorted patient details for the final day
-for y in range(0, len(patients) - 1):
+for y in range(0, len(patients)):
     print("Patient " + str(patients[y].pid) + " - Issues = " + str(patients[y].issues))
+
